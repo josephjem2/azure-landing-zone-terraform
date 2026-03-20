@@ -2,12 +2,11 @@ name: Terraform Plan
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 permissions:
   contents: read
-  id-token: write   # REQUIRED for Azure OIDC login
+  id-token: write
 
 jobs:
   terraform-plan:
@@ -18,8 +17,7 @@ jobs:
         working-directory: terraform
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -28,14 +26,18 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Terraform Init (platform state)
+        run: |
+          terraform init -reconfigure \
+            -backend-config="resource_group_name=rg-platform-state" \
+            -backend-config="storage_account_name=sttfstatejoseph001" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=platform.tfstate"
 
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan
-        run: terraform plan
+      - name: Terraform Plan (bootstrap disabled)
+        run: terraform plan -var="enable_bootstrap=false"
