@@ -14,8 +14,6 @@ jobs:
   terraform-apply:
     runs-on: ubuntu-latest
 
-    # This enforces an approval gate if the environment
-    # has required reviewers configured
     environment:
       name: production
 
@@ -37,12 +35,6 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-
       - name: Terraform Init (reconfigure for CI)
         run: terraform init -reconfigure
 
@@ -51,3 +43,6 @@ jobs:
           terraform version
           terraform providers
           terraform state list
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
