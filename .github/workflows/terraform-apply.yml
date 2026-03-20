@@ -31,8 +31,13 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init (reconfigure for CI)
-        run: terraform init -reconfigure
+      - name: Terraform Init (platform state)
+        run: |
+          terraform init -reconfigure \
+            -backend-config="resource_group_name=rg-platform-state" \
+            -backend-config="storage_account_name=sttfstatejoseph001" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=platform.tfstate"
 
       - name: "Debug: Show backend + state contents"
         run: |
@@ -40,5 +45,5 @@ jobs:
           terraform providers
           terraform state list
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      - name: Terraform Apply (bootstrap disabled)
+        run: terraform apply -auto-approve -var="enable_bootstrap=false"
