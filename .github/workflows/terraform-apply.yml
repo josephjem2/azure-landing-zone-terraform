@@ -42,3 +42,12 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
+
+      - name: Terraform Init (reconfigure for CI)
+        run: terraform init -reconfigure
+
+      - name: Debug: Show backend + state contents
+        run: |
+          terraform version
+          terraform providers
+          terraform state list
